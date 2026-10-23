@@ -1,0 +1,20 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "finance-dashboard",
+	"account_id": "c41a26dd665831d4ab346193a3bbd49f",
+	"compatibility_date": "2026-10-23",
+	"compatibility_flags": ["nodejs_als"],
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"routes": [{ "pattern": "portfolio.pmfg.pt", "custom_domain": true }],
+	"vars": {
+		"OWNER_EMAIL": "pedro.fernandez.godinho@gmail.com",
+		"CF_ACCESS_TEAM_DOMAIN": "pmfgodinho.cloudflareaccess.com",
+		"CF_ACCESS_AUD": "8bf8734b44de7e115d11a07dc2786866b4b21e5a6c5082b4042023b334773213"
+	}
+}

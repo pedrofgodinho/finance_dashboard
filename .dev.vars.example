@@ -1,0 +1,4 @@
+# Optional local overrides. Never commit .dev.vars.
+OWNER_EMAIL=pedro.fernandez.godinho@gmail.com
+CF_ACCESS_TEAM_DOMAIN=
+CF_ACCESS_AUD=
