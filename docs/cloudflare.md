@@ -24,6 +24,40 @@ The local `.env.cloudflare.local` token was used only for account setup. It is i
 control and is not a Worker binding. It may be revoked after setup; serving the application and
 ordinary Wrangler deployments do not need that Access-administration token.
 
+## Automatic Builds from GitHub
+
+Repository: [pedrofgodinho/finance_dashboard](https://github.com/pedrofgodinho/finance_dashboard).
+The initial `main` history has been published. The Workers Builds connection and first automatic
+deployment have not yet been confirmed; track verification in [PLAN.md](../PLAN.md).
+
+In **Workers & Pages > finance-dashboard > Settings > Builds > Connect**, choose GitHub and authorize
+Cloudflare for this repository. Connect the existing Worker so its Access policy continues to apply.
+
+| Setting                              | Value                                         |
+| ------------------------------------ | --------------------------------------------- |
+| Production branch                    | `main`                                        |
+| Root directory                       | `/` (repository root)                         |
+| Build command                        | `npm run validate`                            |
+| Deploy command                       | `npx wrangler deploy`                         |
+| Preview/non-production branch builds | Disabled                                      |
+| Deployment API token                 | Let Cloudflare create a dedicated build token |
+
+The repository's `.nvmrc` selects Node 24. No additional build variables or secrets are needed for the
+current application; runtime settings are already in `wrangler.jsonc`. The Worker name must remain
+`finance-dashboard` in both the dashboard and that configuration.
+
+Agents work on separate branches/bookmarks prefixed with `feat/`, `fix/`, `refactor/`, or `chore/` and
+never push to `main`. The owner reviews and merges changes; the resulting push to `main` triggers
+validation and deployment. A failed validation command stops the deployment. Avoid `npm run deploy`
+as the deploy command here because the validation command already builds the application.
+
+Run the initial build if offered, or inspect the next `main` build under **Deployments > View build
+history**. Confirm validation and deployment succeed, then check the signed-out domain and server-data
+URL still require Access. Mark the connection verified only after observing a successful build.
+
+See [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) and
+[build configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/).
+
 ## Account setup
 
 1. Sign in to Cloudflare and enable the **Zero Trust Free** plan at
