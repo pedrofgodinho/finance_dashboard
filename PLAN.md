@@ -60,6 +60,8 @@ provider mapping still need confirmation. Do not infer those from the ISIN alone
       guidance out of the README.
 - [x] Adopt purpose-based branch prefixes (`feat/`, `fix/`, `refactor/`, `chore/`) following the owner's
       explicit naming-rule update.
+- [x] Confirm owner sign-in/sign-out and denial of access for another email (owner verification).
+- [x] Connect GitHub Workers Builds to `main`; the supplied build log confirms cloning and validation.
 
 Implementation details and account identifiers are in [the Cloudflare guide](docs/cloudflare.md).
 No portfolio database, ETF price integration, purchase tracking, or projection engine exists yet.
@@ -68,10 +70,14 @@ No portfolio database, ETF price integration, purchase tracking, or projection e
 
 ### 1. Verify Hosting Workflow
 
-- [ ] Confirm the owner can complete email-code sign-in and use sign-out.
-- [ ] Confirm another email cannot access the application.
-- [ ] Connect the existing Worker to GitHub Workers Builds for `main`. Instructions were provided;
-      the connection has not been confirmed.
+- [x] Confirm the owner can complete email-code sign-in and use sign-out.
+- [x] Confirm another email cannot access the application.
+- [x] Connect the existing Worker to GitHub Workers Builds for `main`.
+- [x] Fix and locally verify the generated-types failure in a clean build. The first automatic build
+      failed at `wrangler types --check` because its recorded type hash depends on generated Worker
+      output absent from a fresh checkout. Generate ignored declarations before checks/builds instead.
+      Verified an isolated clean install, full validation (22 tests), and a post-build type check.
+- [ ] Merge the build fix through owner review and retry the Cloudflare build.
 - [ ] Verify an automatic build completes validation and deploys successfully, with previews disabled
       and Access still enforced. Intended commands: `npm run validate`, then `npx wrangler deploy`.
 - [ ] Consider GitHub branch protection to enforce review before `main` changes; this is an optional

@@ -11,14 +11,14 @@ Use Node.js 24 (`.nvmrc`) and npm 11 (`packageManager` records npm 11.9.0). Inst
 
 | Command                | Purpose                                                                           |
 | ---------------------- | --------------------------------------------------------------------------------- |
-| `npm run dev`          | Start Vite with hot reloading.                                                    |
-| `npm run check`        | Check generated Cloudflare types and Svelte/TypeScript.                           |
-| `npm run check:watch`  | Run Svelte/TypeScript checks continuously.                                        |
+| `npm run dev`          | Generate Cloudflare types and start Vite with hot reloading.                      |
+| `npm run check`        | Generate Cloudflare types, then check Svelte/TypeScript.                          |
+| `npm run check:watch`  | Generate Cloudflare types, then run Svelte/TypeScript checks continuously.        |
 | `npm run lint`         | Check Prettier formatting and ESLint rules.                                       |
 | `npm run lint:fix`     | Apply automatic ESLint fixes.                                                     |
 | `npm run format`       | Apply Prettier formatting.                                                        |
 | `npm test`             | Run Node's built-in test runner against `tests/*.test.mjs`.                       |
-| `npm run build`        | Verify generated Cloudflare types and build for production.                       |
+| `npm run build`        | Generate Cloudflare types and build for production.                               |
 | `npm run preview`      | Serve the existing production build with Wrangler on port 4173.                   |
 | `npm run gen`          | Regenerate Cloudflare binding/runtime types after Wrangler configuration changes. |
 | `npm run validate`     | Run types, formatting, lint, tests, and production build.                         |
@@ -51,7 +51,14 @@ Use Svelte 5 runes and strict TypeScript. The current toolchain includes SvelteK
 TypeScript 6. `tsconfig.json` enables indexed-access checking and exact optional properties.
 JavaScript diagnostics are disabled because Wrangler's generated main-module declaration imports
 compiled Worker JavaScript; ESLint still checks authored JavaScript configuration files.
-Regenerate `worker-configuration.d.ts` with `npm run gen` instead of editing it manually.
+`worker-configuration.d.ts` is generated and ignored by version control. Installation (`prepare`),
+development, type-check, and build scripts run `npm run gen` before consuming these declarations.
+Run `npm run gen` explicitly when needed; never edit or commit the generated file.
+
+Do not replace generation with `wrangler types --check` against a committed declaration file.
+Wrangler includes entry-point information in its environment hash when the compiled Worker exists,
+so the hash differs between a fresh checkout and an already-built workspace. Generate in the current
+environment first and let Svelte/TypeScript check the application against the resulting declarations.
 
 Prettier uses tabs, single quotes, no trailing commas, and a 100-character print width. EditorConfig
 specifies LF endings. ESLint covers TypeScript, JavaScript, and Svelte.

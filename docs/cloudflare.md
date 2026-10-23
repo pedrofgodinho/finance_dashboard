@@ -27,8 +27,9 @@ ordinary Wrangler deployments do not need that Access-administration token.
 ## Automatic Builds from GitHub
 
 Repository: [pedrofgodinho/finance_dashboard](https://github.com/pedrofgodinho/finance_dashboard).
-The initial `main` history has been published. The Workers Builds connection and first automatic
-deployment have not yet been confirmed; track verification in [PLAN.md](../PLAN.md).
+The initial `main` history has been published and Workers Builds is connected. The first automatic
+build cloned the repository but failed at the generated-types freshness check, before deployment.
+A successful automatic deployment is still pending; track verification in [PLAN.md](../PLAN.md).
 
 In **Workers & Pages > finance-dashboard > Settings > Builds > Connect**, choose GitHub and authorize
 Cloudflare for this repository. Connect the existing Worker so its Access policy continues to apply.
@@ -57,6 +58,21 @@ URL still require Access. Mark the connection verified only after observing a su
 
 See [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) and
 [build configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/).
+
+### Generated Types in Clean Builds
+
+If a build reports `Types at worker-configuration.d.ts are out of date`, retrying the same commit
+does not address the first observed failure. Wrangler's recorded environment hash includes entry-point
+information when `.svelte-kit/cloudflare/_worker.js` exists locally; that build output is absent from
+a fresh checkout.
+
+Install, check, and build scripts now run `npm run gen` to generate declarations for the current
+workspace. `worker-configuration.d.ts` is ignored rather than checked in. The build still runs strict
+Svelte/TypeScript checks, formatting, lint, authentication tests, and compilation. Keep the dashboard's
+build and deploy commands unchanged. After the owner merges this fix, inspect the new `main` build
+and confirm deployment succeeds and Access remains enforced.
+
+See [Cloudflare's type-generation guidance](https://developers.cloudflare.com/workers/languages/typescript/).
 
 ## Account setup
 

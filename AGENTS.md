@@ -31,8 +31,9 @@ Private ETF dashboard using SvelteKit 3, Svelte 5, TypeScript, and Cloudflare Wo
 
 Use Node.js 24 and npm 11. Run `npm ci`, then `npm run dev` for local development.
 Run `npm run validate` before sharing changes: types, formatting, lint, tests, and build.
-Use `npm run format` to format and `npm test` to run tests. After Wrangler configuration changes,
-run `npm run gen`. Full commands and production preview behavior are in `docs/development.md`.
+Use `npm run format` to format and `npm test` to run tests. Install, development, check, and build
+scripts regenerate ignored `worker-configuration.d.ts`; never commit or edit it manually.
+Use `npm run gen` for explicit regeneration. Full commands are in `docs/development.md`.
 
 ## Coding Style & Testing
 
