@@ -11,7 +11,20 @@
 	},
 	"workers_dev": false,
 	"preview_urls": false,
-	"routes": [{ "pattern": "portfolio.pmfg.pt", "custom_domain": true }],
+	"routes": [
+		{
+			"pattern": "portfolio.pmfg.pt",
+			"custom_domain": true
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "PORTFOLIO_DB",
+			"database_name": "finance-dashboard-portfolio",
+			"database_id": "1869eb86-ed6f-4d84-8ab7-8e5b96421fb1",
+			"migrations_dir": "migrations"
+		}
+	],
 	"vars": {
 		"OWNER_EMAIL": "pedro.fernandez.godinho@gmail.com",
 		"CF_ACCESS_TEAM_DOMAIN": "pmfgodinho.cloudflareaccess.com",

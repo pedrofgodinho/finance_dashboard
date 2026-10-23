@@ -24,6 +24,7 @@ Private ETF dashboard using SvelteKit 3, Svelte 5, TypeScript, and Cloudflare Wo
 
 - `src/routes/`: pages, layouts, and loaders; `src/lib/`: shared code/assets via `#lib`.
 - `src/lib/server/`: private logic; `src/hooks.server.ts`: authentication and privacy headers.
+- `src/lib/portfolio.ts`: validation and schedules; `migrations/`: numbered D1 SQL migrations.
 - `static/`: directly served assets; `tests/`: automated tests; `wrangler.jsonc`: Worker configuration.
 - `PLAN.md`: roadmap/decisions; `docs/development.md`: workflow; `docs/cloudflare.md`: hosting.
 
@@ -34,6 +35,8 @@ Run `npm run validate` before sharing changes: types, formatting, lint, tests, a
 Use `npm run format` to format and `npm test` to run tests. Install, development, check, and build
 scripts regenerate ignored `worker-configuration.d.ts`; never commit or edit it manually.
 Use `npm run gen` for explicit regeneration. Full commands are in `docs/development.md`.
+Run `npm run db:migrate` before local development. Production migrations use the explicitly named
+`db:migrate:remote` command; never run local tests against remote portfolio data.
 
 ## Coding Style & Testing
 
@@ -42,6 +45,8 @@ and a 100-character print width; EditorConfig specifies LF endings. Follow ESLin
 filenames such as `+page.svelte`; use PascalCase components and camelCase functions.
 Tests use `node:test` and `node:assert/strict` in `tests/*.test.mjs`. Add meaningful regression cases,
 especially for authorization failures. No coverage percentage is enforced.
+Keep money in integer cents and quantities in integer 10⁻⁸ units. Use `cloudflare:workers` for D1
+bindings. Add new migration files instead of editing applied migrations. See `docs/portfolio.md`.
 
 ## Commit & Pull Request Guidelines
 

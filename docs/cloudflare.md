@@ -27,9 +27,8 @@ ordinary Wrangler deployments do not need that Access-administration token.
 ## Automatic Builds from GitHub
 
 Repository: [pedrofgodinho/finance_dashboard](https://github.com/pedrofgodinho/finance_dashboard).
-The initial `main` history has been published and Workers Builds is connected. The first automatic
-build cloned the repository but failed at the generated-types freshness check, before deployment.
-A successful automatic deployment is still pending; track verification in [PLAN.md](../PLAN.md).
+Workers Builds is connected to `main`. The generated-types issue from the first build has been fixed,
+and the owner confirmed automatic deployment is working. Track subsequent milestones in [PLAN.md](../PLAN.md).
 
 In **Workers & Pages > finance-dashboard > Settings > Builds > Connect**, choose GitHub and authorize
 Cloudflare for this repository. Connect the existing Worker so its Access policy continues to apply.
@@ -69,10 +68,51 @@ a fresh checkout.
 Install, check, and build scripts now run `npm run gen` to generate declarations for the current
 workspace. `worker-configuration.d.ts` is ignored rather than checked in. The build still runs strict
 Svelte/TypeScript checks, formatting, lint, authentication tests, and compilation. Keep the dashboard's
-build and deploy commands unchanged. After the owner merges this fix, inspect the new `main` build
-and confirm deployment succeeds and Access remains enforced.
+build and deploy commands unchanged. For subsequent changes, inspect the new `main` build and
+confirm deployment succeeds and Access remains enforced.
 
 See [Cloudflare's type-generation guidance](https://developers.cloudflare.com/workers/languages/typescript/).
+
+## Portfolio Database
+
+The owner created the EU D1 database `finance-dashboard-portfolio`, ID
+`1869eb86-ed6f-4d84-8ab7-8e5b96421fb1`. `wrangler.jsonc` binds it as `PORTFOLIO_DB`.
+This identifier is configuration, not a credential. The Worker still uses its existing Access policy.
+
+Initialize local storage with `npm run db:migrate`. This uses `--local` and writes under ignored
+`.wrangler/state/`; development does not access production data.
+
+The owner applied `0001_portfolio.sql` to production on 2026-10-23. The supplied Wrangler output
+confirms success with 8 commands executed. The schema is ready for the purchase-tracking release.
+The owner explicitly authorized publication to `main`; automatic deployment and the live persistence
+check remain pending verification.
+
+For subsequent releases, apply tested outstanding migrations from an authorized terminal before
+deploying code that requires them:
+
+```sh
+npm run db:migrate:remote
+```
+
+This uses `--remote` and applies outstanding numbered migrations from `migrations/`. The first creates
+the tables and initial Vanguard fund; it adds no purchases. Do not deploy database-dependent code
+before its schema is ready, and never edit an already-applied migration.
+
+Wrangler requires `d1:write` for remote database management, alongside the existing deployment
+permissions. If the CI deployment token reports D1 permission errors, give that token D1 Edit for
+this account or replace it with an appropriately scoped deployment token. No database API credential
+belongs in application variables or source files; the Worker uses the binding.
+
+Before later migrations, export a private backup to an ignored local path:
+
+```sh
+npm run db:export -- --output .wrangler/portfolio-backup.sql
+```
+
+Use a new dated output filename for each retained backup, and store durable backups securely outside
+the checkout. Never commit SQL exports containing personal records. For recovery, consult
+[D1 import/export](https://developers.cloudflare.com/d1/best-practices/import-export-data/) and
+[D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/).
 
 ## Account setup
 

@@ -25,6 +25,9 @@ Use Node.js 24 (`.nvmrc`) and npm 11 (`packageManager` records npm 11.9.0). Inst
 | `npm run deploy:check` | Build and dry-run the deployment without publishing.                              |
 | `npm run deploy`       | Build and publish the Worker; this changes production.                            |
 
+For purchase tracking, run `npm run db:migrate` before `npm run dev`. This migrates only local D1.
+`npm run db:migrate:remote` is explicitly for production; see [Cloudflare setup](cloudflare.md).
+
 `npm run dev` bypasses authentication only on loopback hostnames in development mode. Never expose
 that server publicly. Run `npm run build` before `npm run preview`; production previews enforce Access
 authentication and do not have the development bypass.
@@ -42,6 +45,7 @@ src/
   app.html           HTML template.
 static/              Directly served assets.
 tests/               Automated behavior tests.
+migrations/          Numbered D1 schema migrations.
 docs/                Development and operational documentation.
 vite.config.ts       Vite, Svelte compiler, SvelteKit, and Cloudflare adapter.
 wrangler.jsonc       Worker identity, hostname, bindings, and runtime configuration.
@@ -109,6 +113,10 @@ Tests use `node:test` and `node:assert/strict`; name files `tests/*.test.mjs` an
 behavior in test names. Authentication tests generate local signing keys and require no network or
 Cloudflare account. Add regression cases for behavior changes, especially authorization failures.
 There is no enforced coverage percentage.
+
+Portfolio storage tests use Node 24's built-in `node:sqlite` against memory-only databases, applying
+the same SQL migration used by D1. They never connect to production. Calendar tests cover leap years,
+month-end clamping, Lisbon daylight saving changes, and stop boundaries. See [portfolio behavior](portfolio.md).
 
 For each task, review `README.md`, `PLAN.md`, `AGENTS.md`, and relevant `docs/`. Update affected content
 in the same change. Keep `PLAN.md` accurate, document decisions and open questions, and leave the

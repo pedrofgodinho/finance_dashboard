@@ -42,6 +42,20 @@ counterparts, so the portfolio does not count both.
 An ISIN identifies the fund; Trade Republic identifies the broker. The exact exchange/listing and data
 provider mapping still need confirmation. Do not infer those from the ISIN alone.
 
+### Purchase Tracking Decisions
+
+- Use Cloudflare D1 with prepared SQL and numbered migrations; no ORM is needed for this slice.
+- First release records EUR amounts and uses `Europe/Lisbon` for manual and scheduled times.
+- Clamp days 29–31 to the last day of a short month. Price estimates will use the next available
+  trading day's closing price; the data provider remains undecided.
+- Choose a time when creating a plan, with 10:00 as the initial form default. During the spring clock gap,
+  scheduled times shift forward one hour. During the autumn overlap, use the first occurrence.
+  Manual input of a nonexistent time is rejected. Store UTC alongside the original local timestamp.
+- Store amounts/fees in integer cents and fractional units in integer 10⁻⁸ units.
+- Separate actual broker units from unpriced records. Do not fabricate prices, quantities, or valuation.
+- Derive schedule previews on read, using stable plan/date identifiers. They do not count as confirmed
+  purchases. Persisting priced estimates and reconciling actual records remain future work.
+
 ## Completed Foundation
 
 - [x] Scaffold SvelteKit with TypeScript, ESLint, Prettier, EditorConfig, and Node/npm version guidance.
@@ -64,7 +78,8 @@ provider mapping still need confirmation. Do not infer those from the ISIN alone
 - [x] Connect GitHub Workers Builds to `main`; the supplied build log confirms cloning and validation.
 
 Implementation details and account identifiers are in [the Cloudflare guide](docs/cloudflare.md).
-No portfolio database, ETF price integration, purchase tracking, or projection engine exists yet.
+Purchase storage and schedule previews are implemented. Historical price
+integration, valuation, reconciliation, and projections remain unimplemented.
 
 ## Remaining Work
 
@@ -77,36 +92,44 @@ No portfolio database, ETF price integration, purchase tracking, or projection e
       failed at `wrangler types --check` because its recorded type hash depends on generated Worker
       output absent from a fresh checkout. Generate ignored declarations before checks/builds instead.
       Verified an isolated clean install, full validation (22 tests), and a post-build type check.
-- [ ] Merge the build fix through owner review and retry the Cloudflare build.
-- [ ] Verify an automatic build completes validation and deploys successfully, with previews disabled
-      and Access still enforced. Intended commands: `npm run validate`, then `npx wrangler deploy`.
+- [x] Merge the build fix and verify automatic deployment (owner confirmed it is working).
 - [ ] Consider GitHub branch protection to enforce review before `main` changes; this is an optional
       safeguard, not an implemented setting.
 
 ### 2. Decide Portfolio Data and Pricing Design
 
-- [ ] Choose persistent storage compatible with the free-tier target. Cloudflare D1 is a candidate;
-      no database or ORM has been selected or provisioned.
-- [ ] Define funds, exchange listings, purchases, recurring plans, generated occurrences, and daily
-      price records, including estimate/actual provenance and reconciliation links.
+- [x] Choose D1 with prepared SQL and migrations. The owner created `finance-dashboard-portfolio`
+      in the EU; its binding is `PORTFOLIO_DB`.
+- [x] Define funds, purchases, monthly plans, provenance, and derived schedule occurrences.
+- [ ] Define exchange listings, daily price records, persisted estimates, and reconciliation links.
 - [ ] Choose a historical ETF data source and verify coverage for the initial ISIN/listing, currency,
       history length, usage limits, and price-adjustment semantics.
 - [ ] Decide caching, refresh frequency, stale-data handling, and recovery when prices are unavailable.
-- [ ] Specify purchase amounts, quantities, fees, currency, rounding, and fractional-unit precision.
-- [ ] Specify the schedule timezone and time, handling for days 29–31, non-trading days, and which
-      daily price represents execution. Daily data cannot reproduce exact intraday execution.
-- [ ] Choose how occurrences are generated and ensure retries cannot duplicate purchases.
-- [ ] Plan schema migrations and backup/export before storing personal portfolio records.
+- [x] Specify EUR amounts, fees, fractional precision, Lisbon times, and month-end rules.
+- [x] Agree to the next trading day's close for estimated pricing. Implementation awaits a data source.
+- [x] Generate schedule previews deterministically; use submission IDs to avoid duplicate records.
+- [x] Add the first migration, local migration commands, and a remote export/backup procedure.
 
 ### 3. Implement Initial Tracking
 
-- [ ] Add ISIN-based ETF selection, prioritizing `IE00BK5BQT80`.
-- [ ] Add one-time purchase entry, distinguishing actual records from inferred execution values.
-- [ ] Add monthly purchase plans with day, scheduled time, amount, and active date range.
+- [x] Seed `IE00BK5BQT80` and allow adding other ETFs by validated ISIN and name.
+- [x] Record one-time purchases with fees, optional actual units, and notes; retain unpriced status.
+- [x] Add monthly purchase plans with day, scheduled time, amount, and active date range.
+- [x] Preview upcoming and recent scheduled dates; keep these separate from recorded purchases.
 - [ ] Generate clearly labelled purchase estimates using historical daily prices.
-- [ ] Support editing/stopping plans without silently rewriting actual purchase history.
+- [x] Stop plans without removing their past schedule; archive purchases without deleting their rows.
+- [ ] Add purchase/plan editing with explicit history semantics.
+- [x] Show recorded investment totals, current monthly contributions, and actual-unit provenance.
 - [ ] Show holdings, invested contributions, valuation, and gains with data dates and provenance.
-- [ ] Add relevant regression tests and verify the private dashboard in the Cloudflare runtime.
+- [x] Pass full validation (49 tests), local D1 browser checks for creation/reload/stop/archive, and
+      a deployment dry run. Verify the compiled local Worker rejects unsigned/spoofed identities
+      and cross-origin form submissions. Synthetic browser records were removed from local storage.
+- [x] Apply `0001_portfolio.sql` to production. The owner's Wrangler output on 2026-10-23
+      confirms successful migration of `finance-dashboard-portfolio` (8 commands executed).
+- [x] Obtain the owner's explicit instruction to publish purchase tracking directly to `main`
+      on 2026-10-23. This release authorization is an exception for this operation; permanent
+      branch and push rules remain unchanged.
+- [ ] Verify automatic deployment and persistent records on the private deployed dashboard.
 
 ### 4. Implement Historical Projections
 
@@ -130,8 +153,7 @@ No portfolio database, ETF price integration, purchase tracking, or projection e
 
 - Which exact trading venue/listing and quote currency should represent the first ETF?
 - Which provider supplies suitable historical prices, and how should adjusted prices be used?
-- Which timezone, execution-time default, month-end rule, and non-trading-day rule should plans use?
-- Is the first release EUR-only, and how should future foreign-currency holdings be handled?
-- What storage, occurrence-generation, and projection approaches best fit the agreed constraints?
+- How should foreign-currency holdings be handled after the EUR-only first release?
+- What pricing, estimate reconciliation, and projection approaches best fit the agreed constraints?
 
 Resolve these during the relevant phase; proposals above are not settled implementation choices.
